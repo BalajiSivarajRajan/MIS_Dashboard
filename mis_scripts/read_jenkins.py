@@ -12,9 +12,11 @@ def db_jobs_insert(db,job,build):
                    "(job_name, job_url, job_color, job_fullname,job_class,build_timestamp,build_number,build_result,build_duration) "
                    "VALUES (%(job_name)s, %(job_url)s, %(job_color)s, %(job_fullname)s, %(job_class)s, FROM_UNIXTIME(%(build_timestamp)s), %(build_number)s, %(build_result)s, %(build_duration)s )")
     # Insert salary information
+    k=build['timestamp'] / 1000
+    print("k:"+str(k))
     data_jobs = {
         'job_name': job['name'], 'job_url': job['url'], 'job_color': job['color'],
-        'job_fullname': job['fullname'], 'job_class': job['_class'], 'build_timestamp': build['timestamp'],
+        'job_fullname': job['fullname'], 'job_class': job['_class'], 'build_timestamp': build['timestamp'] / 1000,
         'build_number': build['number'], 'build_result': build['result'], 'build_duration': build['duration']}
     cursor.execute(add_jobs, data_jobs)
 
@@ -60,6 +62,7 @@ def get_jenkins_jobs():
 
 if(__name__=="__main__"):
     try:
+        #server = jenkins.Jenkins('http://localhost:8080', username='admin', password='admin')
         server = jenkins.Jenkins('http://35.177.162.4:8080', username='admin', password='admin')
         get_jenkins_jobs()
     finally:
