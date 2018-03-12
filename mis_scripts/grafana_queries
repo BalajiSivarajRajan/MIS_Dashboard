@@ -33,9 +33,13 @@ ORDER BY a.build_timestamp ASC
 Heat Map:-
 
 SELECT
-  UNIX_TIMESTAMP(a.build_timestamp) as time_sec,
-  b.cnt as value,
-  UNIX_TIMESTAMP(a.build_timestamp) as metric
-FROM mis_dev_devops.jenkins_jobs a, (select build_timestamp,count(*) as cnt from mis_dev_devops.jenkins_jobs group by build_timestamp) b
-WHERE $__timeFilter(a.build_timestamp) and a.build_timestamp=b.build_timestamp
-ORDER BY a.build_timestamp ASC
+  UNIX_TIMESTAMP(date(a1.build_timestamp)) as time_sec,
+  a1.job_name as metric,
+  b1.success_rate as value
+FROM mis_dev_devops.jenkins_jobs a1, 
+(select a.job_name,(a.cnt/b.cnt)*100 as success_rate from 
+(select job_name,count(*) cnt from mis_dev_devops.jenkins_jobs group by job_name) a, 
+(select job_name,count(*) cnt from mis_dev_devops.jenkins_jobs where build_result='SUCCESS' group by job_name) b
+where a.job_name=b.job_name) b1
+WHERE $__timeFilter(a1.build_timestamp) and a1.job_name=b1.job_name
+ORDER BY date(a1.build_timestamp) ASC
