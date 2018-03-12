@@ -60,7 +60,7 @@ def get_jenkins_jobs():
 
 if(__name__=="__main__"):
     try:
-        server = jenkins.Jenkins('http://35.17.162.4:8080', username='admin', password='admin')
+        server = jenkins.Jenkins('http://35.177.162.4:8080', username='admin', password='admin')
         get_jenkins_jobs()
     finally:
         print("cleanup")
