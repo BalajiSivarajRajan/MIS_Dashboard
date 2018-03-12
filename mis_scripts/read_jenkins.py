@@ -3,14 +3,14 @@ import mysql.connector
 import sys
 
 
-def get_mongodb_con():
+def get_mysqldb_con():
     cnx = mysql.connector.connect(host='127.0.0.1',port=3306,user='root', password='root', database='mis_dev_devops')
     return cnx;
 def db_jobs_insert(db,job,build):
     cursor = db.cursor()
     add_jobs = ("INSERT INTO jenkins_jobs "
                    "(job_name, job_url, job_color, job_fullname,job_class,build_timestamp,build_number,build_result,build_duration) "
-                   "VALUES (%(job_name)s, %(job_url)s, %(job_color)s, %(job_fullname)s, %(job_class)s, %(build_timestamp)s, %(build_number)s, %(build_result)s, %(build_duration)s )")
+                   "VALUES (%(job_name)s, %(job_url)s, %(job_color)s, %(job_fullname)s, %(job_class)s, FROM_UNIXTIME(%(build_timestamp)s), %(build_number)s, %(build_result)s, %(build_duration)s )")
     # Insert salary information
     data_jobs = {
         'job_name': job['name'], 'job_url': job['url'], 'job_color': job['color'],
@@ -25,7 +25,7 @@ def db_jobs_insert(db,job,build):
 
 def get_jenkins_jobs():
     try:
-        db=get_mongodb_con()
+        db=get_mysqldb_con()
         jobs = server.get_all_jobs()
         for job in jobs:
             print(job)
@@ -61,10 +61,6 @@ def get_jenkins_jobs():
 if(__name__=="__main__"):
     try:
         server = jenkins.Jenkins('http://localhost:8080', username='admin', password='admin')
-        user = server.get_whoami()
-        version = server.get_version()
-        print('Hello %s from Jenkins %s' % (user['fullName'], version))
-
         get_jenkins_jobs()
     finally:
         print("cleanup")
