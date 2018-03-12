@@ -4,17 +4,18 @@ import sys
 
 
 def get_mongodb_con():
-    cnx = mysql.connector.connect(host='127.0.0.1',port=3306,user='grafana', password='password', database='mis_dev_devops')
+    cnx = mysql.connector.connect(host='127.0.0.1',port=3306,user='root', password='root', database='mis_dev_devops')
     return cnx;
-def db_jobs_insert(db,job):
+def db_jobs_insert(db,job,build):
     cursor = db.cursor()
     add_jobs = ("INSERT INTO jenkins_jobs "
-                   "(job_name, job_url, job_color, job_fullname,job_class) "
-                   "VALUES (%(job_name)s, %(job_url)s, %(job_color)s, %(job_fullname)s, %(job_class)s)")
+                   "(job_name, job_url, job_color, job_fullname,job_class,build_timestamp,build_number,build_result,build_duration) "
+                   "VALUES (%(job_name)s, %(job_url)s, %(job_color)s, %(job_fullname)s, %(job_class)s, %(build_timestamp)s, %(build_number)s, %(build_result)s, %(build_duration)s )")
     # Insert salary information
     data_jobs = {
         'job_name': job['name'], 'job_url': job['url'], 'job_color': job['color'],
-        'job_fullname': job['fullname'], 'job_class': job['_class']}
+        'job_fullname': job['fullname'], 'job_class': job['_class'], 'build_timestamp': build['timestamp'],
+        'build_number': build['number'], 'build_result': build['result'], 'build_duration': build['duration']}
     cursor.execute(add_jobs, data_jobs)
 
     # Make sure data is committed to the database
@@ -28,15 +29,21 @@ def get_jenkins_jobs():
         jobs = server.get_all_jobs()
         for job in jobs:
             print(job)
-            db_jobs_insert(db,job);
             job_name=job['name']
             print(job_name)
             jobs_info = server.get_job_info(job_name)
+            #print(jobs_info)
             if(jobs_info['nextBuildNumber'] > 1):
                 last_build_number = server.get_job_info(job_name)['lastCompletedBuild']['number']
                 #print(last_build_number)
                 build_info = server.get_build_info(job_name, last_build_number)
-                #print(build_info)
+                db_jobs_insert(db, job,build_info);
+                print(build_info['timestamp'])
+                print(build_info['number'])
+                print(build_info['result'])
+                print(build_info['duration'])
+
+
             #jobs_build_info_id = jobs_build_info_collection.insert_one(build_info).inserted_id
 
             #print(post_id)
@@ -53,10 +60,10 @@ def get_jenkins_jobs():
 
 if(__name__=="__main__"):
     try:
-        server = jenkins.Jenkins('http://172.31.4.1:8080', username='admin', password='admin')
+        server = jenkins.Jenkins('http://localhost:8080', username='admin', password='admin')
         user = server.get_whoami()
-       # version = server.get_version()
-        print('Hello %s from Jenkins ' % (user['fullName']))
+        version = server.get_version()
+        print('Hello %s from Jenkins %s' % (user['fullName'], version))
 
         get_jenkins_jobs()
     finally:
