@@ -1,0 +1,15 @@
+drop table jenkins_jobs
+
+CREATE TABLE `jenkins_jobs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `job_name` varchar(255) NOT NULL,
+  `job_url` varchar(255) NOT NULL,
+  `job_color` varchar(255) NOT NULL,
+  `job_fullname` varchar(255) NOT NULL,
+  `job_class` varchar(255) NOT NULL,
+  `build_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `build_number` int(11) DEFAULT NULL,
+  `build_result` varchar(255) DEFAULT NULL,
+  `build_duration` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+)
