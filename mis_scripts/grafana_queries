@@ -21,12 +21,14 @@ SELECT build_timestamp,job_name,build_number,build_result,build_duration from mi
 line chart:-
 
 SELECT
-  UNIX_TIMESTAMP(a.build_timestamp) as time_sec,
+  UNIX_TIMESTAMP(date(a.build_timestamp)) as time_sec,
   b.cnt as value,
-  UNIX_TIMESTAMP(a.build_timestamp) as metric
-FROM mis_dev_devops.jenkins_jobs a, (select build_timestamp,count(*) as cnt from mis_dev_devops.jenkins_jobs group by build_timestamp) b
-WHERE $__timeFilter(a.build_timestamp) and a.build_timestamp=b.build_timestamp
+  UNIX_TIMESTAMP(date(a.build_timestamp)) as metric
+FROM mis_dev_devops.jenkins_jobs a, (select date(build_timestamp) build_timestamp,count(*) as cnt from mis_dev_devops.jenkins_jobs 
+  group by date(build_timestamp)) b
+WHERE $__timeFilter(a.build_timestamp) and date(a.build_timestamp)=b.build_timestamp
 ORDER BY a.build_timestamp ASC
+
 
 Heat Map:-
 
