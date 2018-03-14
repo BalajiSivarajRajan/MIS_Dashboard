@@ -1,8 +1,8 @@
 from github import Github
 import mysql.connector
 
-cnx = mysql.connector.connect(user='',password='', database='mis_dev_devops')
-g = Github("", "")
+cnx = mysql.connector.connect(user='grafana',password='password', database='mis_dev_devops')
+g = Github("balaji.srb@gmail.com", "wipro@123")
 for repo in g.get_user().get_repos():
     print("repo_name"+repo.name);
 
@@ -11,7 +11,9 @@ for repo in g.get_user().get_repos():
             committer_name = '' if j.committer is None else str(j.committer.name)
             committer_login = '' if j.committer is None else str(j.committer.login)
             committer_id = '' if j.committer is None else str(j.committer.id)
-            committer_updated_at = '' if j.committer is None else str(j.committer.updated_at)
+            committer_updated_at = str(j.committer.updated_at)
+            print ("committer date " + committer_updated_at )
+            #committer_updated_at = '' if j.committer is None else str(j.committer.updated_at)
             s = '{"repo_name":"' + repo.name + '","committer_login":"' +committer_login + '","committer_id":"' + str(
               committer_id) + '","committer_name":"' + committer_name + '","updated_date":"' + str(
                committer_updated_at) + '"}'
@@ -30,31 +32,6 @@ for repo in g.get_user().get_repos():
             cursor.close()
 
 
-
-    max_pull_number=1
-    for k in repo.get_pulls():
-        max_pull_number=k.number
-    print("max_pull_number:"+str(max_pull_number))
-    if(max_pull_number > 1):
-        pull_iter=1
-        while(pull_iter<=max_pull_number):
-            pull=repo.get_pull(pull_iter)
-            s = '{"repo_name":"' + repo.name + '","committer_login":"' + pull.user.login+'","repo_pull_id":"' + str(pull.id) +'","title":"' + pull.title+'","state":"' + pull.state+'","created_time":"' + str(pull.created_at)+'","additions":"' + str(pull.additions)+'","deletions":"' + str(pull.deletions)+'"}'
-            print(s)
-            cursor = cnx.cursor()
-            add_pulls = ("INSERT INTO git_repo_pulls "
-                           "(repo_name, committer_login, repo_pull_id, title,state,repo_pull_created_time,additions,deletions) "
-                           "VALUES (%(repo_name)s, %(committer_login)s, %(repo_pull_id)s, %(title)s, %(state)s, %(repo_pull_created_time)s, %(additions)s, %(deletions)s)")
-            # Insert salary information
-            data_pulls = {
-                'repo_name': repo.name, 'committer_login': pull.user.login, 'repo_pull_id': str(pull.id),
-                'title': pull.title, 'state': pull.state, 'repo_pull_created_time': str(pull.created_at),'additions': str(pull.additions),'deletions': str(pull.deletions)}
-            cursor.execute(add_pulls, data_pulls)
-
-            # Make sure data is committed to the database
-            cnx.commit()
-            cursor.close()
-            pull_iter=pull_iter+1
 
 
 
