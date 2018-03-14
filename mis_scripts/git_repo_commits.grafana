@@ -1,0 +1,36 @@
+
+1). Git Commits by Repo Query:-
+
+SELECT UNIX_TIMESTAMP(a.updated_date) as time_sec,
+   b.cnt as value,
+  a.repo_name as metric
+FROM git_repo_commits a, (select repo_name,count(*) as cnt from git_repo_commits where  $__timeFilter(updated_date) group by repo_name) b 
+where a.repo_name=b.repo_name and  $__timeFilter(a.updated_date)
+
+
+2).git commits by Login Query:-
+
+SELECT UNIX_TIMESTAMP(a.updated_date) as time_sec,
+   b.cnt as value,
+  a.committer_name as metric
+FROM git_repo_commits a, (select committer_name,count(*) as cnt from git_repo_commits where  $__timeFilter(updated_date) group by committer_name) b
+where a.committer_name=b.committer_name and  $__timeFilter(a.updated_date)
+
+3).Latest Commits Query:-
+
+SELECT distinct a.committer_name as "Developer Name",a.repo_name "Repository Name",a.updated_date as "Commit Date"
+  FROM git_repo_commits a
+  WHERE  $__timeFilter(a.updated_date)
+  order by a.updated_date desc
+  limit 3
+  
+4).Commits Trend Query:-
+
+SELECT
+  UNIX_TIMESTAMP(date(a.updated_date)) as time_sec,
+  b.cnt as value,
+ UNIX_TIMESTAMP(date(a.updated_date)) as metric
+FROM git_repo_commits a, (select date(updated_date) updated_date,count(*) cnt from git_repo_commits where  $__timeFilter(updated_date) group by date(updated_date))b
+WHERE $__timeFilter(a.updated_date) and date(a.updated_date)=b.updated_date
+ORDER BY a.updated_date ASC
+
