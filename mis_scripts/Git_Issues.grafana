@@ -1,0 +1,43 @@
+1). Issues by Login Query:-
+
+SELECT UNIX_TIMESTAMP(a.repo_issue_created_time) as time_sec,
+   b.cnt as value,
+  a.issue_user as metric
+FROM git_repo_issues a, (select issue_user,count(*) as cnt from git_repo_issues where  $__timeFilter(repo_issue_created_time) group by issue_user) b
+where $__timeFilter(a.repo_issue_created_time) and a.issue_user=b.issue_user
+
+2).Issues by Repo Query:-
+
+ SELECT UNIX_TIMESTAMP(a.repo_issue_created_time) as time_sec,
+   b.cnt as value,
+  a.repo_name as metric
+FROM git_repo_issues a, (select repo_name,count(*) as cnt from git_repo_issues where  $__timeFilter(repo_issue_created_time) group by repo_name) b
+where $__timeFilter(a.repo_issue_created_time) and a.repo_name=b.repo_name
+
+3).Issues Trend Query:-
+
+ SELECT
+  UNIX_TIMESTAMP(date(a.repo_issue_created_time)) as time_sec,
+  b.cnt as value,
+ UNIX_TIMESTAMP(date(a.repo_issue_created_time)) as metric
+FROM git_repo_issues a, (select date(repo_issue_created_time) repo_issue_created_time,count(*) cnt from git_repo_issues 
+where  $__timeFilter(repo_issue_created_time)
+group by date(repo_issue_created_time))b
+WHERE $__timeFilter(a.repo_issue_created_time) and date(a.repo_issue_created_time)=b.repo_issue_created_time
+ORDER BY a.repo_issue_created_time ASC
+
+
+4).Oldest Open Issues Queries:-
+  SELECT distinct a.repo_name as "Repo Name",a.issue_user as "Assigned To",a.title as "Issue details",a.repo_issue_created_time as " Created On" 
+  FROM git_repo_issues a
+  where a.state='open' and  $__timeFilter(a.repo_issue_created_time)
+  order by a.repo_issue_created_time asc
+  limit 5
+
+5).Latest Closed Issued Query:-
+  SELECT distinct a.repo_name,a.issue_user,a.title,a.repo_issue_created_time 
+  FROM git_repo_issues a
+  where a.state='closed' and $__timeFilter(a.repo_issue_created_time)
+  order by a.repo_issue_created_time desc
+  limit 5
+  
