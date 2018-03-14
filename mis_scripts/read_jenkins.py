@@ -4,7 +4,7 @@ import sys
 
 
 def get_mysqldb_con():
-    cnx = mysql.connector.connect(host='127.0.0.1',port=3306,user='grafana', password='password', database='mis_dev_devops')
+    cnx = mysql.connector.connect(host='127.0.0.1',port=3306,user='root', password='root', database='mis_dev_devops')
     return cnx;
 def db_jobs_insert(db,job,build):
     cursor = db.cursor()
@@ -38,19 +38,19 @@ def get_jenkins_jobs():
             if(jobs_info['nextBuildNumber'] > 1):
                 last_build_number = server.get_job_info(job_name)['lastCompletedBuild']['number']
                 #print(last_build_number)
-                build_info = server.get_build_info(job_name, last_build_number)
-                db_jobs_insert(db, job,build_info);
-                print(build_info['timestamp'])
-                print(build_info['number'])
-                print(build_info['result'])
-                print(build_info['duration'])
+                iter=1
+                while(iter <= last_build_number):
+                    build_info = server.get_build_info(job_name, iter)
+                    db_jobs_insert(db, job,build_info);
+                    print(build_info['timestamp'])
+                    print(build_info['number'])
+                    print(build_info['result'])
+                    print(build_info['duration'])
+                    iter = iter + 1;
 
 
-            #jobs_build_info_id = jobs_build_info_collection.insert_one(build_info).inserted_id
 
-            #print(post_id)
-            #print(jobs_info_id)
-            #print jobs_build_info_id
+
     except ValueError:
         print "Error Can't find the input file"
     except:
