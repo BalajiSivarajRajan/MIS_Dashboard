@@ -4,7 +4,7 @@ import sys
 
 
 def get_mysqldb_con():
-    cnx = mysql.connector.connect(host='127.0.0.1',port=3306,user='root', password='root', database='mis_dev_devops')
+    cnx = mysql.connector.connect(host='127.0.0.1',port=3306,user='grafana', password='password', database='mis_dev_devops')
     return cnx;
 def db_jobs_insert(db,job,build):
     cursor = db.cursor()
