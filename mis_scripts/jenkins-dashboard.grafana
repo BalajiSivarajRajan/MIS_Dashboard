@@ -1,0 +1,51 @@
+1). Jenkins Jobs Execution Time Query:-
+
+
+SELECT  
+  UNIX_TIMESTAMP(date(a.build_timestamp)) as time_sec,
+  a.job_name as metric,
+  b.cnt as value
+FROM mis_dev_devops.jenkins_jobs a, 
+(select job_name,avg(build_duration) cnt from mis_dev_devops.jenkins_jobs WHERE $__timeFilter(build_timestamp) group by job_name) b
+WHERE $__timeFilter(a.build_timestamp) and a.job_name=b.job_name
+order by b.cnt 
+
+
+2). Jenkins Job Failure Ratio Query:-
+
+SELECT  
+  UNIX_TIMESTAMP(date(a1.build_timestamp)) as time_sec,
+  a1.job_name as metric,
+  b1.failure_rate as value
+FROM mis_dev_devops.jenkins_jobs a1, 
+(select a.job_name,(b.cnt/a.cnt)*100 as failure_rate from 
+(select job_name,count(*) cnt from mis_dev_devops.jenkins_jobs WHERE $__timeFilter(build_timestamp) group by job_name) a, 
+(select job_name,count(*) cnt from mis_dev_devops.jenkins_jobs WHERE $__timeFilter(build_timestamp) and build_result='FAILURE' group by job_name) b
+where a.job_name=b.job_name) b1
+WHERE $__timeFilter(a1.build_timestamp) and a1.job_name=b1.job_name
+order by b1.failure_rate 
+
+
+3).Overall build status Query:-
+
+SELECT
+  UNIX_TIMESTAMP(a.build_timestamp) as time_sec,
+  b.cnt as value,
+  b.build_result as metric
+FROM mis_dev_devops.jenkins_jobs a,(select build_result,count(*) cnt from mis_dev_devops.jenkins_jobs  group by build_result) b
+WHERE a.build_result=b.build_result
+ORDER BY a.build_timestamp ASC
+
+
+4).Last Three Jenkins Success Jobs Query:-
+
+SELECT build_timestamp as "Job Last Run",job_name as "Job Name",build_number "Job Build No.",build_result as "Job Status",build_duration "Job Execution Time"from mis_dev_devops.jenkins_jobs where build_result = "SUCCESS" order by build_timestamp desc limit 3 ;
+
+
+5).Last Three Jenkins Fail Jobs Query:-
+
+SELECT build_timestamp as "Job Last Run",job_name as "Job Name",build_number "Job Build No.",build_result as "Job Status",build_duration "Job Execution Time"from mis_dev_devops.jenkins_jobs where build_result = "FAILURE" order by build_timestamp desc limit 3 ;
+
+
+
+
